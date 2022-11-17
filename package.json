@@ -22,6 +22,7 @@
   "dependencies": {
     "body-parser": "^1.17.2",
     "express": "^4.15.3",
+    "moment": "^2.29.4",
     "mongoose": "^5.4.18",
     "nodemon": "^1.11.0"
   }
