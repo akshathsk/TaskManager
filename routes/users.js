@@ -46,7 +46,6 @@ module.exports = (router) => {
     }
   });
 
-  //404 case
   router.route("/users").get(async (req, res) => {
     try {
       const finalQuery = util.getQuery(req.query, UserModel);
@@ -57,8 +56,6 @@ module.exports = (router) => {
     }
   });
 
-  //404 case
-  //500 case is when id is incorrect
   router.route("/users/:id").get(async (req, res) => {
     try {
       const finalQuery = util.getQueryById(req.params.id, req.query, UserModel);

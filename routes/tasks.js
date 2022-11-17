@@ -46,7 +46,6 @@ module.exports = (router) => {
     }
   });
 
-  //404 case
   router.route("/tasks").get(async (req, res) => {
     try {
       const finalQuery = util.getQuery(req.query, TaskModel);
@@ -57,7 +56,6 @@ module.exports = (router) => {
     }
   });
 
-  //404 case
   router.route("/tasks/:id").get(async (req, res) => {
     try {
       const finalQuery = util.getQueryById(req.params.id, req.query, TaskModel);
@@ -72,7 +70,6 @@ module.exports = (router) => {
     }
   });
 
-  //404 case
   router.route("/tasks/:id").put(async (req, res) => {
     try {
       const id = req.params.id;
@@ -168,7 +165,6 @@ module.exports = (router) => {
     }
   });
 
-  //404 case
   router.route("/tasks/:id").delete(async (req, res) => {
     try {
       const id = req.params.id;
