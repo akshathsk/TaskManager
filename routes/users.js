@@ -42,7 +42,7 @@ module.exports = (router) => {
       }
       util.created(res, "User has been created", dataToSave);
     } catch (error) {
-      util.badRequest(res, error.message, "");
+      util.badRequest(res, error.message, {});
     }
   });
 
@@ -66,7 +66,7 @@ module.exports = (router) => {
         data
       );
     } catch (error) {
-      util.badRequest(res, error.message, "User ID: " + req.params.id);
+      util.badRequest(res, error.message, { _id: req.params.id });
     }
   });
 
@@ -110,6 +110,9 @@ module.exports = (router) => {
           return;
         }
       }
+
+      const userDataOld = await UserModel.findById(id);
+
       const options = { new: true };
       const result = await UserModel.findByIdAndUpdate(
         id,
@@ -144,9 +147,28 @@ module.exports = (router) => {
         }
       }
 
+      if (req.body.pendingTasks && req.body.pendingTasks.length > 0) {
+        let diff =  userService.getRemovedIds(
+          res,
+          req.body.pendingTasks instanceof Array
+            ? req.body.pendingTasks
+            : [req.body.pendingTasks],
+          userDataOld
+        );
+        if (diff && diff.length > 0) {
+          var unsetUsersFromTaskStatus = await taskService.unsetUsersFromTask(
+            res,
+            diff
+          );
+          if (!unsetUsersFromTaskStatus) {
+            return;
+          }
+        }
+      }
+
       util.success(res, result);
     } catch (error) {
-      util.badRequest(res, error.message, "User ID: " + req.params.id);
+      util.badRequest(res, error.message, { _id: req.params.id });
     }
   });
 
@@ -177,7 +199,7 @@ module.exports = (router) => {
         message
       );
     } catch (error) {
-      util.badRequest(res, error.message, "User ID: " + req.params.id);
+      util.badRequest(res, error.message, { _id: req.params.id });
     }
   });
 

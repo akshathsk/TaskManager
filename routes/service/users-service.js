@@ -6,7 +6,7 @@ var ObjectId = require("mongoose").Types.ObjectId;
 const validateEmail = (res, input) => {
   if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(input)) {
     let msg = "Please provide a valid email";
-    util.badRequest(res, msg, "Email: " + input);
+    util.badRequest(res, msg, { email: input });
     return false;
   }
   return true;
@@ -15,7 +15,7 @@ const validateEmail = (res, input) => {
 const validateUserId = async (res, id) => {
   if (!ObjectId.isValid(id)) {
     let msg = "Invalid value provided for user id";
-    util.badRequest(res, msg, "User ID: " + id);
+    util.badRequest(res, msg, { _id: id });
     return false;
   }
 
@@ -44,7 +44,7 @@ const validatePendingTasks = async (res, pendingTasksFromRequest) => {
       });
       if (invalidRequestIds.length > 0) {
         let msg = "Invalid values provided for pendingTask";
-        util.badRequest(res, msg, invalidRequestIds.join(","));
+        util.badRequest(res, msg, { pendingTasks: invalidRequestIds });
         return false;
       }
 
@@ -54,7 +54,7 @@ const validatePendingTasks = async (res, pendingTasksFromRequest) => {
       if (pendingTasksFromDb.length != pendingTasksFromRequest.length) {
         let msg =
           "Pending task array contains invalid or duplicate entries. Please check if the task exists.";
-        util.badRequest(res, msg, pendingTasksFromRequest);
+        util.badRequest(res, msg, { pendingTasks: pendingTasksFromRequest });
         return false;
       }
       var invalidIds = [];
@@ -65,7 +65,7 @@ const validatePendingTasks = async (res, pendingTasksFromRequest) => {
       });
       if (invalidIds.length > 0) {
         let msg = "Completed tasks cannot be assigned to a user.";
-        util.badRequest(res, msg, invalidIds.join(","));
+        util.badRequest(res, msg, { pendingTasks: invalidIds });
         return false;
       }
     }
@@ -73,6 +73,19 @@ const validatePendingTasks = async (res, pendingTasksFromRequest) => {
   } catch (error) {
     util.ise(res, "Failed to validate User.", error.message);
     return false;
+  }
+};
+
+const getRemovedIds = (res, pendingTasksFromRequest, userDataOld) => {
+  try {
+    const stringsArray = userDataOld.pendingTasks.map((x) => x.toString());
+    const diffArr = stringsArray.filter(
+      (o) => !pendingTasksFromRequest.includes(o)
+    );
+    return diffArr;
+  } catch (error) {
+    util.ise(res, "Failed to update User.", error.message);
+    return null;
   }
 };
 
@@ -146,3 +159,4 @@ exports.deletePendingTaskFromUser = deletePendingTaskFromUser;
 exports.validateUserId = validateUserId;
 exports.pushTaskToAssignedUser = pushTaskToAssignedUser;
 exports.validateEmail = validateEmail;
+exports.getRemovedIds = getRemovedIds;

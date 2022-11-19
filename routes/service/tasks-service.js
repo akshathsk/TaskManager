@@ -13,7 +13,7 @@ const getTaskByIds = async (ids) => {
 const validateTaskId = async (res, id, req) => {
   if (!ObjectId.isValid(id)) {
     let msg = "Invalid value provided for task id";
-    util.badRequest(res, msg, "Task ID: " + id);
+    util.badRequest(res, msg, { _id: id });
     return false;
   }
 
@@ -27,7 +27,7 @@ const validateTaskId = async (res, id, req) => {
 
     if (req.body.assignedUser && data.completed === true) {
       let msg = "A completed task cannot be assigned to a user";
-      util.badRequest(res, msg, "Task ID: " + id);
+      util.badRequest(res, msg, { _id: id });
       return false;
     }
   } catch (error) {
@@ -40,12 +40,12 @@ const validateTaskId = async (res, id, req) => {
 const validateCompletedTask = (res, body) => {
   if (!body) {
     let msg = "Please provide a valid request body.";
-    util.badRequest(res, msg, "");
+    util.badRequest(res, msg, {});
     return false;
   }
   if (body.completed && body.completed === true) {
     let msg = "A task cannot be created with a completed status true.";
-    util.badRequest(res, msg, "completed: " + body.completed);
+    util.badRequest(res, msg, { completed: body.completed });
     return false;
   }
   return true;
@@ -65,14 +65,14 @@ const validateUserId = async (res, request) => {
       let msg =
         "Missing attribute assignedUser. Please provide a valid assignedUser associated with the user name : " +
         assignedUserName;
-      util.badRequest(res, msg, "User Name : " + assignedUserName);
+      util.badRequest(res, msg, { name: assignedUserName });
       return null;
     }
 
     if (assignedUser && assignedUser !== "") {
       if (!ObjectId.isValid(assignedUser)) {
         let msg = "Invalid value provided for assignedUser.";
-        util.badRequest(res, msg, "assignedUser: " + assignedUser);
+        util.badRequest(res, msg, { assignedUser: assignedUser });
         return null;
       }
       var data = await userService.getUserById(assignedUser);
@@ -80,7 +80,7 @@ const validateUserId = async (res, request) => {
       if (data.length == 0) {
         let msg =
           "User not found. Please provide a valid value for assignedUser.";
-        util.badRequest(res, msg, "assignedUser: " + assignedUser);
+        util.badRequest(res, msg, { assignedUser: assignedUser });
         return null;
       }
 
@@ -90,7 +90,7 @@ const validateUserId = async (res, request) => {
           let msg =
             "Invalid data provided. assignedUserName does not match with the user records. Expected assignedUserName : " +
             userName;
-          util.badRequest(res, msg, "");
+          util.badRequest(res, msg, {});
           return null;
         }
       } else {
@@ -133,6 +133,19 @@ const unsetUserFromTask = async (res, userId) => {
   }
 };
 
+const unsetUsersFromTask = async (res, taskIds) => {
+  let update = JSON.parse(
+    '{"assignedUser": "' + "" + '", "assignedUserName": "' + "unassigned" + '"}'
+  );
+  try {
+    await TaskModel.updateMany({ _id: { $in: [...taskIds] } }, update);
+    return true;
+  } catch (error) {
+    util.ise(res, "Failed to update Tasks.", error.message);
+    return false;
+  }
+};
+
 module.exports = {
   getTaskByIds: getTaskByIds,
   validateUserId: validateUserId,
@@ -140,4 +153,5 @@ module.exports = {
   unsetUserFromTask: unsetUserFromTask,
   validateTaskId: validateTaskId,
   validateCompletedTask: validateCompletedTask,
+  unsetUsersFromTask: unsetUsersFromTask,
 };

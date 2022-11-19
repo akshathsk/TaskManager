@@ -42,7 +42,7 @@ module.exports = (router) => {
       }
       util.created(res, "Task has been created", dataToSave);
     } catch (error) {
-      util.badRequest(res, error.message, "");
+      util.badRequest(res, error.message, {});
     }
   });
 
@@ -66,7 +66,7 @@ module.exports = (router) => {
         data
       );
     } catch (error) {
-      util.badRequest(res, error.message, "Task ID: " + req.params.id);
+      util.badRequest(res, error.message, { _id: req.params.id });
     }
   });
 
@@ -161,7 +161,7 @@ module.exports = (router) => {
 
       util.success(res, result);
     } catch (error) {
-      util.badRequest(res, error.message, "Task ID: " + req.params.id);
+      util.badRequest(res, error.message, { _id: req.params.id });
     }
   });
 
@@ -180,7 +180,7 @@ module.exports = (router) => {
         message
       );
     } catch (error) {
-      util.badRequest(res, error.message, "Task ID: " + req.params.id);
+      util.badRequest(res, error.message, { _id: req.params.id });
     }
   });
 
